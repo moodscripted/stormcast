@@ -42,7 +42,7 @@ class HurricanePanel(private val ctx: Context) : Panel {
     override fun refresh(lat: Double, lon: Double) {
         job?.cancel()
         box.removeAllViews()
-        box.addView(ctx.body("Checking NHC active storms…"))
+        box.addView(ctx.body("Checking NHC active storms\u2026"))
         job = scope.launch {
             try {
                 val data = Api.getJson("https://www.nhc.noaa.gov/CurrentStorms.json")
@@ -57,23 +57,23 @@ class HurricanePanel(private val ctx: Context) : Panel {
                     for (i in 0 until storms.length()) {
                         val s = storms.getJSONObject(i)
                         box.addView(ctx.card(stormSummary(s), 0xFFEF4444.toInt()))
-                        box.addView(ctx.actionButton("🗺  View cone & track map", true) { openConeTrackMap(s) })
-                        box.addView(ctx.actionButton("📄  Public advisory") {
-                            showText("Public advisory — ${s.optString("name")}",
+                        box.addView(ctx.actionButton("\uD83D\uDDFA  View cone & track map", true) { openConeTrackMap(s) })
+                        box.addView(ctx.actionButton("\uD83D\uDCC4  Public advisory") {
+                            showText("Public advisory \u2014 ${s.optString("name")}",
                                 s.optJSONObject("publicAdvisory")?.optString("url"))
-                        }
-                        box.addView(ctx.actionButton("📄  Forecast advisory") {
-                            showText("Forecast advisory — ${s.optString("name")}",
+                        })
+                        box.addView(ctx.actionButton("\uD83D\uDCC4  Forecast advisory") {
+                            showText("Forecast advisory \u2014 ${s.optString("name")}",
                                 s.optJSONObject("forecastAdvisory")?.optString("url"))
-                        }
-                        box.addView(ctx.actionButton("📄  Forecast discussion") {
-                            showText("Forecast discussion — ${s.optString("name")}",
+                        })
+                        box.addView(ctx.actionButton("\uD83D\uDCC4  Forecast discussion") {
+                            showText("Forecast discussion \u2014 ${s.optString("name")}",
                                 s.optJSONObject("forecastDiscussion")?.optString("url"))
-                        }
-                        box.addView(ctx.actionButton("📄  Wind speed probabilities") {
-                            showText("Wind speed probabilities — ${s.optString("name")}",
+                        })
+                        box.addView(ctx.actionButton("\uD83D\uDCC4  Wind speed probabilities") {
+                            showText("Wind speed probabilities \u2014 ${s.optString("name")}",
                                 s.optJSONObject("windSpeedProbabilities")?.optString("url"))
-                        }
+                        })
                     }
                     box.addView(ctx.body("Advisories are issued every 6 hours (every 3 hours when watches or warnings are in effect)."))
                 }
@@ -103,7 +103,7 @@ class HurricanePanel(private val ctx: Context) : Panel {
             else -> s.optString("classification")
         }
         val dir = s.optDouble("movementDir", Double.NaN)
-        val dirTxt = if (dir.isNaN()) "?" else "${dir.toInt()}° (${cardinal(dir)})"
+        val dirTxt = if (dir.isNaN()) "?" else "${dir.toInt()}\u00B0 (${cardinal(dir)})"
         return buildString {
             append(cls).append(" ").append(s.optString("name"))
                 .append("  (").append(s.optString("id")).append(")\n\n")
@@ -137,7 +137,7 @@ class HurricanePanel(private val ctx: Context) : Panel {
             Toast.makeText(ctx, "No map data available yet", Toast.LENGTH_SHORT).show()
             return
         }
-        Toast.makeText(ctx, "Loading cone & track…", Toast.LENGTH_SHORT).show()
+        Toast.makeText(ctx, "Loading cone & track\u2026", Toast.LENGTH_SHORT).show()
         scope.launch {
             try {
                 val shapes = ArrayList<GeoShape>()
@@ -303,7 +303,7 @@ class HurricanePanel(private val ctx: Context) : Panel {
             loadDataWithBaseURL("https://www.openstreetmap.org/", html, "text/html", "UTF-8", null)
         }
         val dlg = AlertDialog.Builder(ctx)
-            .setTitle("$name — cone & track")
+            .setTitle("$name \u2014 cone & track")
             .setView(web)
             .setPositiveButton("Close", null)
             .create()
@@ -321,7 +321,7 @@ class HurricanePanel(private val ctx: Context) : Panel {
             Toast.makeText(ctx, "Not available yet", Toast.LENGTH_SHORT).show()
             return
         }
-        Toast.makeText(ctx, "Loading…", Toast.LENGTH_SHORT).show()
+        Toast.makeText(ctx, "Loading\u2026", Toast.LENGTH_SHORT).show()
         scope.launch {
             try {
                 val raw = Api.getText(url)

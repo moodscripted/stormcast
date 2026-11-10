@@ -30,7 +30,7 @@ class AlertsPanel(private val ctx: Context) : Panel {
     override fun refresh(lat: Double, lon: Double) {
         job?.cancel()
         box.removeAllViews()
-        box.addView(ctx.body("Checking active alerts…"))
+        box.addView(ctx.body("Checking active alerts\u2026"))
         job = scope.launch {
             try {
                 val url = "https://api.weather.gov/alerts/active?point=${fmt(lat)},${fmt(lon)}"

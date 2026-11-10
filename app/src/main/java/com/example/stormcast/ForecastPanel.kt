@@ -10,6 +10,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.IOException
 
 class ForecastPanel(private val ctx: Context) : Panel {
 
@@ -34,7 +35,9 @@ class ForecastPanel(private val ctx: Context) : Panel {
         job = scope.launch {
             try {
                 val points = Api.getJson("https://api.weather.gov/points/${fmt(lat)},${fmt(lon)}")
-                val forecastUrl = points.getJSONObject("properties").getString("forecastUrl")
+                val props = points.getJSONObject("properties")
+                val forecastUrl = props.optString("forecast").ifBlank { props.optString("forecastUrl") }
+                if (forecastUrl.isBlank()) throw IOException("No forecast URL in NWS response")
                 val forecast = Api.getJson(forecastUrl)
                 val periods = forecast.getJSONObject("properties").getJSONArray("periods")
                 withContext(Dispatchers.Main) {

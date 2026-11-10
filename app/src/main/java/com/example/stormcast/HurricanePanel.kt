@@ -256,8 +256,20 @@ class HurricanePanel(private val ctx: Context) : Panel {
         <div id="status">Loading map...</div>
         <script>
         var data = __DATA__;
-        var map = L.map('map');
-        map.whenReady(function() { var s = document.getElementById('status'); s.style.display = 'none'; });
+        var map = L.map('map', {minZoom: 2, maxZoom: 16});
+        map.whenReady(function() {
+          setTimeout(function() {
+            if (map.getSize().x > 0) setStatus(null);
+            else setStatus('Map area did not size correctly');
+          }, 0);
+        });
+        var tileErrShown = false;
+        map.on('tileerror', function(e) {
+          if (tileErrShown) return;
+          tileErrShown = true;
+          var m = (e.tile && e.tile.src || '').match(/tile\/(\d+)\//);
+          setStatus('Some basemap tiles failed to load' + (m ? ' (zoom ' + m[1] + ')' : ''));
+        });
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
           attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, FAO, NOAA, USGS',
           maxZoom: 16
@@ -317,8 +329,14 @@ class HurricanePanel(private val ctx: Context) : Panel {
             settings.javaScriptEnabled = true
             settings.builtInZoomControls = true
             settings.displayZoomControls = false
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = true
             setBackgroundColor(0xFF0B1220.toInt())
-            loadDataWithBaseURL("https://www.openstreetmap.org/", html, "text/html", "UTF-8", null)
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            clearCache(true)
         }
         val dlg = AlertDialog.Builder(ctx)
             .setTitle("$name \u2014 cone & track")
@@ -330,6 +348,9 @@ class HurricanePanel(private val ctx: Context) : Panel {
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
+        web.post {
+            web.loadDataWithBaseURL("https://www.openstreetmap.org/", html, "text/html", "UTF-8", null)
+        }
     }
 
     // ---------------------------------------------------------------- in-app advisory text

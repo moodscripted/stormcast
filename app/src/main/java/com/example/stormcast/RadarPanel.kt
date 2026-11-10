@@ -23,6 +23,7 @@ class RadarPanel(private val ctx: Context) : Panel {
     override fun refresh(lat: Double, lon: Double) {
         web.settings.javaScriptEnabled = true
         web.setBackgroundColor(0xFF0B1220.toInt())
+        web.clearCache(true)
         web.loadDataWithBaseURL(
             "https://api.rainviewer.com/",
             html(lat, lon),
@@ -55,8 +56,20 @@ class RadarPanel(private val ctx: Context) : Panel {
           if (t === null) { s.style.display = 'none'; }
           else { s.style.display = 'block'; s.textContent = t; }
         }
-        var map = L.map('map').setView([LAT, LON], 7);
-        map.whenReady(function() { setStatus(null); });
+        var map = L.map('map', {minZoom: 3, maxZoom: 16}).setView([LAT, LON], 7);
+        map.whenReady(function() {
+          setTimeout(function() {
+            if (map.getSize().x > 0) setStatus(null);
+            else setStatus('Map area did not size correctly');
+          }, 0);
+        });
+        var tileErrShown = false;
+        map.on('tileerror', function(e) {
+          if (tileErrShown) return;
+          tileErrShown = true;
+          var m = (e.tile && e.tile.src || '').match(/tile\/(\d+)\//);
+          setStatus('Some basemap tiles failed to load' + (m ? ' (zoom ' + m[1] + ')' : '') + ' - tap Refresh to retry');
+        });
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
           attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, FAO, NOAA, USGS',
           maxZoom: 16

@@ -2,5 +2,7 @@
 <resources>
     <style name="Theme.StormCast" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
+        <item name="android:statusBarColor">@color/header</item>
+        <item name="android:windowBackground">@color/windowBg</item>
     </style>
 </resources>

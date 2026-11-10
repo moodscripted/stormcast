@@ -20,7 +20,7 @@ class ForecastPanel(private val ctx: Context) : Panel {
 
     private val box = LinearLayout(ctx).apply {
         orientation = LinearLayout.VERTICAL
-        setPadding(0, dp(4), 0, dp(12))
+        setPadding(0, dp(4), 0, dp(16))
     }
 
     override val root: View = ScrollView(ctx).apply {
@@ -45,22 +45,16 @@ class ForecastPanel(private val ctx: Context) : Panel {
                     box.addView(ctx.heading("NWS forecast"))
                     for (i in 0 until periods.length()) {
                         val p = periods.getJSONObject(i)
-                        val text = buildString {
-                            append(p.optString("name"))
-                                .append("  ·  ")
-                                .append(p.optString("temperature"))
-                                .append("°")
-                                .append(p.optString("temperatureUnit"))
-                                .append("\n")
-                            append(p.optString("shortForecast"))
-                                .append("\nWind: ")
-                                .append(p.optString("windSpeed"))
-                                .append(" ")
-                                .append(p.optString("windDirection"))
-                                .append("\n\n")
-                            append(p.optString("detailedForecast"))
-                        }
-                        box.addView(ctx.card(text))
+                        box.addView(
+                            ctx.forecastCard(
+                                name = p.optString("name"),
+                                temp = p.optString("temperature"),
+                                unit = p.optString("temperatureUnit"),
+                                short = p.optString("shortForecast"),
+                                wind = "Wind: ${p.optString("windSpeed")} ${p.optString("windDirection")}",
+                                detail = p.optString("detailedForecast")
+                            )
+                        )
                     }
                 }
             } catch (e: Exception) {

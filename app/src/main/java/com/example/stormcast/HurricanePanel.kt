@@ -29,6 +29,14 @@ class HurricanePanel(private val ctx: Context) : Panel {
     private var job: Job? = null
     private fun dp(v: Int) = ctx.dp(v)
 
+    private val leafletCss: String by lazy {
+        ctx.assets.open("leaflet.css").bufferedReader().use { it.readText() }
+    }
+
+    private val leafletJs: String by lazy {
+        ctx.assets.open("leaflet.js").bufferedReader().use { it.readText() }
+    }
+
     private val box = LinearLayout(ctx).apply {
         orientation = LinearLayout.VERTICAL
         setPadding(0, dp(8), 0, dp(16))
@@ -237,15 +245,19 @@ class HurricanePanel(private val ctx: Context) : Panel {
         <html>
         <head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <style>__LEAFLET_CSS__</style>
         <style>html,body,#map{margin:0;padding:0;height:100%;background:#0B1220}</style>
+        <style>#status{position:absolute;top:10px;left:10px;z-index:1000;background:rgba(10,16,30,.88);color:#cbd5e1;padding:6px 12px;border-radius:8px;font:13px sans-serif}</style>
+        <script>window.onerror = function(msg) { var s = document.getElementById('status'); if (s) s.textContent = 'Map error: ' + msg; };</script>
+        <script>__LEAFLET_JS__</script>
         </head>
         <body>
         <div id="map"></div>
+        <div id="status">Loading map...</div>
         <script>
         var data = __DATA__;
         var map = L.map('map');
+        map.whenReady(function() { var s = document.getElementById('status'); s.style.display = 'none'; });
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
           attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
           subdomains: 'abcd', maxZoom: 19
@@ -289,6 +301,8 @@ class HurricanePanel(private val ctx: Context) : Panel {
         </body>
         </html>
         """.trimIndent()
+            .replace("__LEAFLET_CSS__", leafletCss)
+            .replace("__LEAFLET_JS__", leafletJs)
             .replace("__DATA__", data.toString())
             .replace("__LAT__", fmt(lat))
             .replace("__LON__", fmt(lon))
@@ -300,6 +314,7 @@ class HurricanePanel(private val ctx: Context) : Panel {
             settings.javaScriptEnabled = true
             settings.builtInZoomControls = true
             settings.displayZoomControls = false
+            setBackgroundColor(0xFF0B1220.toInt())
             loadDataWithBaseURL("https://www.openstreetmap.org/", html, "text/html", "UTF-8", null)
         }
         val dlg = AlertDialog.Builder(ctx)
@@ -349,6 +364,19 @@ class HurricanePanel(private val ctx: Context) : Panel {
     }
 
     private fun cleanHtml(raw: String): String {
+        val pre = Regex("<pre[^>]*>(.*?)</pre>", setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+            .find(raw)?.groupValues?.get(1)
+        if (pre != null) {
+            return pre
+                .replace("\r\n", "\n")
+                .replace("&nbsp;", " ")
+                .replace("&amp;", "&")
+                .replace("&lt;", "<")
+                .replace("&gt;", ">")
+                .replace(Regex("[ \\t]+\n"), "\n")
+                .replace(Regex("\n{3,}"), "\n\n")
+                .trim()
+        }
         return raw
             .replace(Regex("(?s)<script.*?</script>", RegexOption.IGNORE_CASE), " ")
             .replace(Regex("(?s)<style.*?</style>", RegexOption.IGNORE_CASE), " ")
@@ -358,7 +386,9 @@ class HurricanePanel(private val ctx: Context) : Panel {
             .replace("&lt;", "<")
             .replace("&gt;", ">")
             .replace(Regex("[ \\t]+"), " ")
-            .replace(Regex("\n[ \\t]*\n+"), "\n\n")
-            .trim()
+            .split("\n")
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .joinToString("\n")
     }
 }

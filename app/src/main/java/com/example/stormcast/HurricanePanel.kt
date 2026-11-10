@@ -7,7 +7,6 @@ import android.graphics.Typeface
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -57,21 +56,21 @@ class HurricanePanel(private val ctx: Context) : Panel {
                     }
                     for (i in 0 until storms.length()) {
                         val s = storms.getJSONObject(i)
-                        box.addView(ctx.card(stormSummary(s), 0xFFD32F2F.toInt()))
-                        addButton("🗺  Cone & track map") { openConeTrackMap(s) }
-                        addButton("📄  Public advisory") {
+                        box.addView(ctx.card(stormSummary(s), 0xFFEF4444.toInt()))
+                        box.addView(ctx.actionButton("🗺  View cone & track map", true) { openConeTrackMap(s) })
+                        box.addView(ctx.actionButton("📄  Public advisory") {
                             showText("Public advisory — ${s.optString("name")}",
                                 s.optJSONObject("publicAdvisory")?.optString("url"))
                         }
-                        addButton("📄  Forecast advisory") {
+                        box.addView(ctx.actionButton("📄  Forecast advisory") {
                             showText("Forecast advisory — ${s.optString("name")}",
                                 s.optJSONObject("forecastAdvisory")?.optString("url"))
                         }
-                        addButton("📄  Forecast discussion") {
+                        box.addView(ctx.actionButton("📄  Forecast discussion") {
                             showText("Forecast discussion — ${s.optString("name")}",
                                 s.optJSONObject("forecastDiscussion")?.optString("url"))
                         }
-                        addButton("📄  Wind speed probabilities") {
+                        box.addView(ctx.actionButton("📄  Wind speed probabilities") {
                             showText("Wind speed probabilities — ${s.optString("name")}",
                                 s.optJSONObject("windSpeedProbabilities")?.optString("url"))
                         }
@@ -126,19 +125,6 @@ class HurricanePanel(private val ctx: Context) : Panel {
         return dirs[((deg % 360 + 360) % 360 / 22.5).toInt() % 16]
     }
 
-    private fun addButton(label: String, onClick: () -> Unit) {
-        box.addView(Button(ctx).apply {
-            text = label
-            isAllCaps = false
-            textSize = 15f
-            setOnClickListener { onClick() }
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply { setMargins(dp(20), dp(8), dp(20), 0) }
-        })
-    }
-
     // ---------------------------------------------------------------- in-app cone & track map
 
     private fun openConeTrackMap(s: JSONObject) {
@@ -154,10 +140,10 @@ class HurricanePanel(private val ctx: Context) : Panel {
         Toast.makeText(ctx, "Loading cone & track…", Toast.LENGTH_SHORT).show()
         scope.launch {
             try {
-                val shapes = ArrayList<List<Pair<Double, Double>>>()
+                val shapes = ArrayList<GeoShape>()
                 for (u in listOf(trackUrl, coneUrl)) {
                     if (u.isNullOrBlank() || !u.startsWith("http")) continue
-                    extractKml(Api.getBytes(u))?.let { shapes.addAll(parseKml(it)) }
+                    extractKml(Api.getBytes(u))?.let { shapes.addAll(parseKmlShapes(it)) }
                 }
                 if (shapes.isEmpty()) throw IOException("No track data available for $name yet")
                 withContext(Dispatchers.Main) {
@@ -188,39 +174,63 @@ class HurricanePanel(private val ctx: Context) : Panel {
         }
     }
 
-    private fun parseKml(kml: String): List<List<Pair<Double, Double>>> {
-        val shapes = ArrayList<List<Pair<Double, Double>>>()
-        val re = Regex(
-            "<coordinates>(.*?)</coordinates>",
-            setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)
-        )
-        for (m in re.findAll(kml)) {
-            val pts = ArrayList<Pair<Double, Double>>()
-            for (tok in m.groupValues[1].trim().split(Regex("\\s+"))) {
-                if (tok.isBlank()) continue
-                val c = tok.split(",")
-                if (c.size >= 2) {
-                    val lon = c[0].toDoubleOrNull()
-                    val lat = c[1].toDoubleOrNull()
-                    if (lon != null && lat != null) pts.add(lon to lat)
-                }
+    private enum class GeoKind { POLYGON, LINE, POINT }
+
+    private class GeoShape(val kind: GeoKind, val pts: List<Pair<Double, Double>>, val label: String)
+
+    private fun parseKmlShapes(kml: String): List<GeoShape> {
+        val opts = setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL)
+        val placemarkRe = Regex("<Placemark>(.*?)</Placemark>", opts)
+        val coordRe = Regex("<coordinates>(.*?)</coordinates>", opts)
+        val fcstRe = Regex("<Data name=\"fcstpd\">\\s*<value>([^<]*)</value>", opts)
+        val hrRe = Regex("(\\d+)\\s*hr", opts)
+        val shapes = ArrayList<GeoShape>()
+        for (pm in placemarkRe.findAll(kml)) {
+            val block = pm.groupValues[1]
+            val kind = when {
+                block.contains("<Polygon", true) -> GeoKind.POLYGON
+                block.contains("<LineString", true) -> GeoKind.LINE
+                else -> GeoKind.POINT
             }
-            if (pts.isNotEmpty()) shapes.add(pts)
+            val hours = fcstRe.find(block)?.groupValues?.get(1)?.trim()?.toIntOrNull()
+                ?: hrRe.find(block)?.groupValues?.get(1)?.trim()?.toIntOrNull()
+            val label = if (hours != null && hours > 0) "$hours hr" else "Current"
+            for (cm in coordRe.findAll(block)) {
+                val pts = ArrayList<Pair<Double, Double>>()
+                for (tok in cm.groupValues[1].trim().split(Regex("\\s+"))) {
+                    if (tok.isBlank()) continue
+                    val c = tok.split(",")
+                    if (c.size >= 2) {
+                        val lo0 = c[0].toDoubleOrNull() ?: continue
+                        val la = c[1].toDoubleOrNull() ?: continue
+                        var lo = lo0
+                        if (lo > 180.0) lo -= 360.0
+                        if (lo < -180.0) lo += 360.0
+                        pts.add(lo to la)
+                    }
+                }
+                if (pts.isNotEmpty()) shapes.add(GeoShape(kind, pts, label))
+            }
         }
         return shapes
     }
 
     private fun mapHtml(
         name: String,
-        shapes: List<List<Pair<Double, Double>>>,
+        shapes: List<GeoShape>,
         lat: Double,
         lon: Double
     ): String {
         val data = JSONArray()
         for (sh in shapes) {
-            val arr = JSONArray()
-            for (p in sh) arr.put(JSONArray().put(p.first).put(p.second))
-            data.put(arr)
+            val pts = JSONArray()
+            for (p in sh.pts) pts.put(JSONArray().put(p.first).put(p.second))
+            data.put(
+                JSONObject()
+                    .put("kind", sh.kind.name.lowercase())
+                    .put("pts", pts)
+                    .put("label", sh.label)
+            )
         }
         return """
         <!DOCTYPE html>
@@ -229,31 +239,50 @@ class HurricanePanel(private val ctx: Context) : Panel {
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        <style>html,body,#map{margin:0;padding:0;height:100%;background:#111}</style>
+        <style>html,body,#map{margin:0;padding:0;height:100%;background:#0B1220}</style>
         </head>
         <body>
         <div id="map"></div>
         <script>
         var data = __DATA__;
         var map = L.map('map');
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '(c) OpenStreetMap contributors'
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
+          subdomains: 'abcd', maxZoom: 19
         }).addTo(map);
         var all = [];
+        var points = [];
         data.forEach(function(sh) {
-          var ll = sh.map(function(p) { return [p[1], p[0]]; });
-          if (ll.length > 40) {
-            L.polygon(ll, {color: '#F44336', weight: 2, fillOpacity: 0.15}).addTo(map);
-          } else if (ll.length > 1) {
-            L.polyline(ll, {color: '#FFC107', weight: 4, opacity: 0.9}).addTo(map);
+          var ll = sh.pts.map(function(p) { return [p[1], p[0]]; });
+          ll.forEach(function(q){ all.push(q); });
+          if (sh.kind === 'polygon') {
+            L.polygon(ll, {color: '#F87171', weight: 1.5, fillColor: '#EF4444', fillOpacity: 0.15}).addTo(map);
+          } else if (sh.kind === 'line') {
+            L.polyline(ll, {color: '#FBBF24', weight: 4, opacity: 0.95}).addTo(map);
           } else {
-            L.circleMarker(ll[0], {radius: 6, color: '#F44336', fillOpacity: 1}).addTo(map);
+            points.push({ll: ll[0], label: sh.label});
+            L.circleMarker(ll[0], {radius: 6, color: '#FFFFFF', weight: 2, fillColor: '#EF4444', fillOpacity: 1})
+              .addTo(map)
+              .bindTooltip(sh.label, {direction: 'top', offset: [0, -6]});
           }
-          all = all.concat(ll);
         });
+        if (points.length > 1) {
+          L.polyline(points.map(function(p){ return p.ll; }),
+            {color: '#FBBF24', weight: 2, dashArray: '2 8', opacity: 0.9}).addTo(map);
+        }
         L.circleMarker([__LAT__, __LON__], {
-          radius: 9, color: '#FFFFFF', fillColor: '#D32F2F', fillOpacity: 1, weight: 3
-        }).addTo(map);
+          radius: 9, color: '#FFFFFF', fillColor: '#DC2626', fillOpacity: 1, weight: 3
+        }).addTo(map).bindTooltip('Current position', {direction: 'top', offset: [0, -8]});
+        all.push([__LAT__, __LON__]);
+        var legend = L.control({position: 'bottomright'});
+        legend.onAdd = function() {
+          var d = L.DomUtil.create('div');
+          d.style.cssText = 'background:rgba(10,16,30,.85);color:#cbd5e1;padding:8px 12px;border-radius:8px;font:12px sans-serif;line-height:1.7';
+          d.innerHTML = '<span style="color:#F87171">&#9644;</span> Cone of uncertainty<br>' +
+                        '<span style="color:#FBBF24">&#9644;</span> Forecast track';
+          return d;
+        };
+        legend.addTo(map);
         if (all.length > 0) { map.fitBounds(L.latLngBounds(all).pad(0.15)); }
         else { map.setView([__LAT__, __LON__], 5); }
         </script>

@@ -8,8 +8,6 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.text.InputType
 import android.view.Gravity
-import android.view.View
-import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -29,7 +27,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var coordsView: TextView
     private lateinit var content: FrameLayout
-    private lateinit var tabs: Array<Button>
+    private lateinit var tabs: List<TextView>
     private val panels = ArrayList<Panel>()
     private var currentTab = -1
     private var lat = 25.7617
@@ -44,47 +42,43 @@ class MainActivity : AppCompatActivity() {
         lat = prefs.getFloat("lat", lat.toFloat()).toDouble()
         lon = prefs.getFloat("lon", lon.toFloat()).toDouble()
 
-        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val root = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setBackgroundColor(cBg())
+        }
 
         // ---- Header ----
         val header = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            setBackgroundColor(0xFF0D47A1.toInt())
+            setBackgroundColor(cHeader())
             gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(16), dp(12), dp(12), dp(12))
+            elevation = dp(3).toFloat()
         }
         val title = TextView(this).apply {
             text = getString(R.string.app_name)
-            textSize = 20f
+            textSize = 22f
             setTextColor(0xFFFFFFFF.toInt())
-            setPadding(dp(16), dp(14), dp(8), dp(14))
+            setTypeface(typeface, Typeface.BOLD)
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         }
-        val gpsBtn = Button(this).apply { text = "📍 GPS"; setOnClickListener { useGps() } }
-        val setBtn = Button(this).apply { text = "Set…"; setOnClickListener { showCoordDialog() } }
+        val gpsBtn = headerButton("📍 GPS") { useGps() }
+        val setBtn = headerButton("Set…") { showCoordDialog() }
         header.addView(title)
         header.addView(gpsBtn)
         header.addView(setBtn)
 
         coordsView = TextView(this).apply {
             textSize = 12f
-            setTextColor(0xFFB3CDEB.toInt())
-            setBackgroundColor(0xFF0D47A1.toInt())
-            setPadding(dp(16), 0, dp(16), dp(10))
+            setTextColor(0xFF9FB4D9.toInt())
+            setBackgroundColor(cHeader())
+            setPadding(dp(16), 0, dp(16), dp(12))
         }
 
         // ---- Tabs ----
-        val tabRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        tabs = Array(tabNames.size) { i ->
-            Button(this).apply {
-                text = tabNames[i]
-                isAllCaps = false
-                setOnClickListener { selectTab(i) }
-            }
-        }
-        for (b in tabs) {
-            b.layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            tabRow.addView(b)
-        }
+        val (tabRow, tabViews) = tabRow(tabNames.toList())
+        tabs = tabViews
+        tabViews.forEachIndexed { i, tv -> tv.setOnClickListener { selectTab(i) } }
 
         // ---- Content ----
         content = FrameLayout(this)
@@ -109,12 +103,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun selectTab(i: Int) {
         currentTab = i
-        for (j in tabs.indices) {
-            val sel = j == i
-            val b = tabs[j]
-            b.setTypeface(b.typeface, if (sel) Typeface.BOLD else Typeface.NORMAL)
-            b.setTextColor(if (sel) 0xFF0D47A1.toInt() else 0xFF64748B.toInt())
-        }
+        for (j in tabs.indices) styleTab(tabs[j], j == i)
         content.removeAllViews()
         content.addView(
             panels[i].root,

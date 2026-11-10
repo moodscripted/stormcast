@@ -7,7 +7,7 @@ A Kotlin Android app for US weather with NOAA data — no API keys required.
 - **Forecast** — NWS point forecast (`api.weather.gov`) for your GPS location or manual coordinates
 - **Alerts** — active NWS alerts, color-coded by severity (tornado / hurricane / severe weather warnings included)
 - **Radar** — animated radar map (RainViewer tiles + Leaflet in a WebView) with Play/Pause
-- **Cyclones** — active tropical cyclones from NOAA NHC (`CurrentStorms.json`) with position, intensity, pressure, movement, and links to official advisories
+- **Cyclones** — active tropical cyclones from NOAA NHC with full advisory data and an in-app cone & track map rendered from NHC GIS data
 
 ## Build
 
@@ -35,7 +35,7 @@ enter coordinates anywhere in the US. The location is saved between launches.
 ## Tech
 
 - Kotlin, no external UI framework — UI built programmatically, `org.json` for parsing,
-  coroutines for networking, WebView + Leaflet for the radar map.
+  coroutines for networking, WebView + Leaflet for maps.
 - Data: api.weather.gov, nhc.noaa.gov, RainViewer free tile service.
 
 ## License

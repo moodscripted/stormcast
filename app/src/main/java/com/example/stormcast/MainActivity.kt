@@ -3,6 +3,7 @@ package com.example.stormcast
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.graphics.Typeface
 import android.location.LocationManager
 import android.os.Bundle
 import android.text.InputType
@@ -108,7 +109,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun selectTab(i: Int) {
         currentTab = i
-        for (j in tabs.indices) tabs[j].isEnabled = j != i
+        for (j in tabs.indices) {
+            val sel = j == i
+            val b = tabs[j]
+            b.setTypeface(b.typeface, if (sel) Typeface.BOLD else Typeface.NORMAL)
+            b.setTextColor(if (sel) 0xFF0D47A1.toInt() else 0xFF64748B.toInt())
+        }
         content.removeAllViews()
         content.addView(
             panels[i].root,

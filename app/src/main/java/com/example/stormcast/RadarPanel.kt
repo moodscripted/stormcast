@@ -57,9 +57,12 @@ class RadarPanel(private val ctx: Context) : Panel {
         }
         var map = L.map('map').setView([LAT, LON], 7);
         map.whenReady(function() { setStatus(null); });
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-          attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-          subdomains: 'abcd', maxZoom: 19
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, FAO, NOAA, USGS',
+          maxZoom: 16
+        }).addTo(map);
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
+          maxZoom: 16, opacity: 0.9
         }).addTo(map);
         L.circleMarker([LAT, LON], {radius: 7, color: '#FFFFFF', weight: 2, fillColor: '#60A5FA', fillOpacity: 1}).addTo(map);
         fetch('https://api.rainviewer.com/public/weather-maps.json')

@@ -121,7 +121,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateCoordsView() {
-        coordsView.text = "Location: ${fmt(lat)}, ${fmt(lon)}"
+        val ver = try {
+            packageManager.getPackageInfo(packageName, 0).versionName ?: "?"
+        } catch (e: Exception) {
+            "?"
+        }
+        coordsView.text = "Location: ${fmt(lat)}, ${fmt(lon)}   ·   v$ver"
     }
 
     private fun setLocation(la: Double, lo: Double) {

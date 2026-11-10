@@ -31,7 +31,7 @@ class ForecastPanel(private val ctx: Context) : Panel {
     override fun refresh(lat: Double, lon: Double) {
         job?.cancel()
         box.removeAllViews()
-        box.addView(ctx.body("Loading forecast…"))
+        box.addView(ctx.body("Loading forecast\u2026"))
         job = scope.launch {
             try {
                 val points = Api.getJson("https://api.weather.gov/points/${fmt(lat)},${fmt(lon)}")

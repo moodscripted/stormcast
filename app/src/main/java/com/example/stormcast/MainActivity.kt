@@ -62,8 +62,8 @@ class MainActivity : AppCompatActivity() {
             setTypeface(typeface, Typeface.BOLD)
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
         }
-        val gpsBtn = headerButton("📍 GPS") { useGps() }
-        val setBtn = headerButton("Set…") { showCoordDialog() }
+        val gpsBtn = headerButton("\uD83D\uDCCD GPS") { useGps() }
+        val setBtn = headerButton("Set\u2026") { showCoordDialog() }
         header.addView(title)
         header.addView(gpsBtn)
         header.addView(setBtn)
@@ -121,7 +121,7 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             "?"
         }
-        coordsView.text = "Location: ${fmt(lat)}, ${fmt(lon)}   ·   v$ver"
+        coordsView.text = "Location: ${fmt(lat)}, ${fmt(lon)}   \u00B7   v$ver"
     }
 
     private fun setLocation(la: Double, lo: Double) {
@@ -153,7 +153,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(
                     this,
-                    "No last known location. Enable location services or use Set…",
+                    "No last known location. Enable location services or use Set\u2026",
                     Toast.LENGTH_LONG
                 ).show()
             }
@@ -179,7 +179,7 @@ class MainActivity : AppCompatActivity() {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 useGps()
             } else {
-                Toast.makeText(this, "Location denied — use Set… to enter coordinates", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Location denied \u2014 use Set\u2026 to enter coordinates", Toast.LENGTH_LONG).show()
             }
         }
     }

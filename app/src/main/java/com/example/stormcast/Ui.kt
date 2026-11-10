@@ -122,7 +122,7 @@ fun Context.forecastCard(
         layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
     })
     top.addView(TextView(this).apply {
-        text = "$temp°$unit"
+        text = "$temp\u00B0$unit"
         textSize = 26f
         setTextColor(cText())
         setTypeface(typeface, Typeface.BOLD)

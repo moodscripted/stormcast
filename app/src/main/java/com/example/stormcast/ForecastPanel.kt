@@ -15,6 +15,7 @@ class ForecastPanel(private val ctx: Context) : Panel {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var job: Job? = null
+    private fun dp(v: Int) = ctx.dp(v)
 
     private val box = LinearLayout(ctx).apply {
         orientation = LinearLayout.VERTICAL
@@ -22,7 +23,7 @@ class ForecastPanel(private val ctx: Context) : Panel {
     }
 
     override val root: View = ScrollView(ctx).apply {
-        fillViewport = true
+        setFillViewport(true)
         addView(box)
     }
 

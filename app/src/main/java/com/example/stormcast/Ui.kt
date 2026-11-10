@@ -31,14 +31,14 @@ fun Context.heading(text: String): TextView = TextView(this).apply {
 fun Context.body(text: String): TextView = TextView(this).apply {
     this.text = text
     textSize = 15f
-    setLineSpacing(dp(2), 1f)
+    setLineSpacing(dp(2).toFloat(), 1f)
     setPadding(dp(20), dp(8), dp(20), dp(8))
 }
 
 fun Context.card(text: String, accent: Int = 0xFF1976D2.toInt()): TextView = TextView(this).apply {
     this.text = text
     textSize = 15f
-    setLineSpacing(dp(2), 1f)
+    setLineSpacing(dp(2).toFloat(), 1f)
     setPadding(dp(20), dp(16), dp(20), dp(16))
     background = GradientDrawable().apply {
         setColor(if (isNight()) 0xFF1C2940.toInt() else 0xFFF7F9FC.toInt())

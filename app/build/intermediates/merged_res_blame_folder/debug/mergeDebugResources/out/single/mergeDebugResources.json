@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "com.example.stormcast.app-debug-39:/drawable_ic_stat_alert.xml.flat",
+        "source": "com.example.stormcast.app-main-41:/drawable/ic_stat_alert.xml"
+    },
+    {
+        "merged": "com.example.stormcast.app-debug-39:/drawable_widget_bg.xml.flat",
+        "source": "com.example.stormcast.app-main-41:/drawable/widget_bg.xml"
+    },
+    {
+        "merged": "com.example.stormcast.app-debug-39:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.example.stormcast.app-main-41:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.example.stormcast.app-debug-39:/layout_widget_storm.xml.flat",
+        "source": "com.example.stormcast.app-main-41:/layout/widget_storm.xml"
+    },
+    {
+        "merged": "com.example.stormcast.app-debug-39:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.example.stormcast.app-main-41:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.example.stormcast.app-debug-39:/xml_storm_widget_info.xml.flat",
+        "source": "com.example.stormcast.app-main-41:/xml/storm_widget_info.xml"
+    }
+]

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="220dp"
+    android:height="110dp"
+    android:viewportWidth="220"
+    android:viewportHeight="110">
+    <path
+        android:fillColor="#0D1930"
+        android:pathData="M20,0 H200 A20,20 0 0 1 220,20 V90 A20,20 0 0 1 200,110 H20 A20,20 0 0 1 0,90 V20 A20,20 0 0 1 20,0 z" />
+    <!-- sun + cloud -->
+    <path
+        android:fillColor="#FFC107"
+        android:pathData="M52,50 a18,18 0 1,0 0.01,0 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,76 a12,12 0 0 1 12,-12 a16,16 0 0 1 30,4 a10,10 0 0 1 -2,20 H48 a8,8 0 0 1 -8,-12 z" />
+    <!-- text-like bars -->
+    <path
+        android:fillColor="#9FB4D9"
+        android:pathData="M104,28 h60 a3,3 0 0 1 0,6 h-60 a3,3 0 0 1 0,-6 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M104,46 h84 a5,5 0 0 1 0,10 h-84 a5,5 0 0 1 0,-10 z" />
+    <path
+        android:fillColor="#E7EEF9"
+        android:pathData="M104,66 h64 a3,3 0 0 1 0,6 h-64 a3,3 0 0 1 0,-6 z" />
+    <path
+        android:fillColor="#FFA94D"
+        android:pathData="M104,84 h74 a3.5,3.5 0 0 1 0,7 h-74 a3.5,3.5 0 0 1 0,-7 z" />
+</vector>

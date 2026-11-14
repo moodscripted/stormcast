@@ -1,0 +1,42 @@
+[
+    {
+        "merged": "/home/mike/.gradle/daemon/9.3.0/com.example.stormcast.app-release-39:/xml_storm_widget_info.xml.flat",
+        "source": "/home/mike/.gradle/daemon/9.3.0/com.example.stormcast.app-main-40:/xml/storm_widget_info.xml"
+    },
+    {
+        "merged": "/home/mike/.gradle/daemon/9.3.0/com.example.stormcast.app-release-39:/layout_widget_storm.xml.flat",
+        "source": "/home/mike/.gradle/daemon/9.3.0/com.example.stormcast.app-main-40:/layout/widget_storm.xml"
+    },
+    {
+        "merged": "com.example.stormcast.app-release-39:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.example.stormcast.app-main-40:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.example.stormcast.app-release-39:/xml_storm_widget_info.xml.flat",
+        "source": "com.example.stormcast.app-main-40:/xml/storm_widget_info.xml"
+    },
+    {
+        "merged": "/home/mike/.gradle/daemon/9.3.0/com.example.stormcast.app-release-39:/drawable_ic_stat_alert.xml.flat",
+        "source": "/home/mike/.gradle/daemon/9.3.0/com.example.stormcast.app-main-40:/drawable/ic_stat_alert.xml"
+    },
+    {
+        "merged": "/home/mike/.gradle/daemon/9.3.0/com.example.stormcast.app-release-39:/layout_widget_storm_large.xml.flat",
+        "source": "/home/mike/.gradle/daemon/9.3.0/com.example.stormcast.app-main-40:/layout/widget_storm_large.xml"
+    },
+    {
+        "merged": "com.example.stormcast.app-release-39:/drawable_widget_preview.xml.flat",
+        "source": "com.example.stormcast.app-main-40:/drawable/widget_preview.xml"
+    },
+    {
+        "merged": "/home/mike/.gradle/daemon/9.3.0/com.example.stormcast.app-release-39:/drawable_widget_bg.xml.flat",
+        "source": "/home/mike/.gradle/daemon/9.3.0/com.example.stormcast.app-main-40:/drawable/widget_bg.xml"
+    },
+    {
+        "merged": "/home/mike/.gradle/daemon/9.3.0/com.example.stormcast.app-release-39:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "/home/mike/.gradle/daemon/9.3.0/com.example.stormcast.app-main-40:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "/home/mike/.gradle/daemon/9.3.0/com.example.stormcast.app-release-39:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/home/mike/.gradle/daemon/9.3.0/com.example.stormcast.app-main-40:/mipmap-anydpi-v26/ic_launcher.xml"
+    }
+]

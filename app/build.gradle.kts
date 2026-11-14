@@ -11,8 +11,8 @@ android {
         applicationId = "com.example.stormcast"
         minSdk = 26
         targetSdk = 34
-        versionCode = 8
-        versionName = "1.2.3"
+        versionCode = 17
+        versionName = "1.6.0"
     }
 
     buildTypes {
@@ -44,5 +44,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 }
 

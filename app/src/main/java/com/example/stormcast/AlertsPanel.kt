@@ -38,6 +38,7 @@ class AlertsPanel(private val ctx: Context) : Panel {
                 val features = data.getJSONArray("features")
                 withContext(Dispatchers.Main) {
                     box.removeAllViews()
+                    Api.takeStaleNote()?.let { box.addView(ctx.body("\uD83D\uDCE1  $it")) }
                     box.addView(ctx.heading("Active alerts (${features.length()})"))
                     if (features.length() == 0) {
                         box.addView(ctx.body("No active alerts for this location."))

@@ -171,7 +171,8 @@ fun Context.tabRow(names: List<String>): Pair<LinearLayout, List<TextView>> {
         TextView(this).apply {
             text = n
             gravity = Gravity.CENTER
-            textSize = 14f
+            textSize = if (names.size > 4) 12.5f else 14f
+            maxLines = 1
             setPadding(0, dp(11), 0, dp(11))
             layoutParams = LinearLayout.LayoutParams(
                 0,
@@ -235,3 +236,49 @@ fun Context.actionButton(label: String, primary: Boolean = false, onClick: () ->
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply { setMargins(dp(16), dp(8), dp(16), 0) }
     }
+
+// ---- charts ----
+
+/** Simple 0-100 bar chart (e.g. chance of rain per hour) with sparse x labels. */
+class BarChartView(
+    ctx: Context,
+    private val values: List<Int>,
+    private val labels: List<String>,
+    private val barColor: Int,
+    private val textColor: Int,
+    private val gridColor: Int
+) : View(ctx) {
+
+    private val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+    private val labelH = ctx.dp(18)
+
+    override fun onMeasure(w: Int, h: Int) {
+        setMeasuredDimension(MeasureSpec.getSize(w), context.dp(110) + labelH)
+    }
+
+    override fun onDraw(c: android.graphics.Canvas) {
+        val n = values.size
+        if (n == 0) return
+        val chartH = (height - labelH).toFloat()
+        val slot = width.toFloat() / n
+        // 50% gridline
+        paint.color = gridColor
+        paint.strokeWidth = context.dp(1).toFloat()
+        c.drawLine(0f, chartH / 2, width.toFloat(), chartH / 2, paint)
+        paint.textSize = context.dp(10).toFloat()
+        for (i in 0 until n) {
+            val v = values[i].coerceIn(0, 100)
+            val barH = if (v == 0) 0f else maxOf(v / 100f * chartH, context.dp(2).toFloat())
+            val left = i * slot + slot * 0.15f
+            val right = (i + 1) * slot - slot * 0.15f
+            paint.color = barColor
+            if (v > 0) c.drawRoundRect(left, chartH - barH, right, chartH, 6f, 6f, paint)
+            val lab = labels.getOrNull(i).orEmpty()
+            if (lab.isNotEmpty()) {
+                paint.color = textColor
+                paint.textAlign = android.graphics.Paint.Align.CENTER
+                c.drawText(lab, i * slot + slot / 2, height - context.dp(3).toFloat(), paint)
+            }
+        }
+    }
+}
